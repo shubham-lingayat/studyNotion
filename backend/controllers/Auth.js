@@ -196,7 +196,7 @@ exports.login = async (req, res) => {
       const payload = {
         email: user.email,
         id: user._id,
-        role: user.role,
+        accountType: user.accountType,
       };
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "2h",
@@ -301,7 +301,12 @@ exports.changePassword = async (req, res) => {
     await user.save();
     console.log("Password Updated Successfully!");
 
-    // send mailn ----------------------------------
+    // send mail ----------------------------------
+    await mailSender(
+      email,
+      "Password Updated",
+      "Your Password has been Updated Successfully!"
+    );
 
     // return resposne
     return res.status(200).json({
