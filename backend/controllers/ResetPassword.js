@@ -50,17 +50,54 @@ exports.resetPasswordToken = async (req, res) => {
   }
 };
 
-// Rset password After user click on LINK received in mail 
+// Reset password After user click on LINK received in mail
 exports.resetPassword = async (req, res) => {
   try {
     // data fetch from req.body
+    const { password, confirmPassword, token } = req.body;
     // get the token
     // Validation
+    if (password !== confirmPassword) {
+      return res.status(401).status({
+        success: false,
+        message: "Password and Confirm Password not matched",
+      });
+    }
     // Get the user details using Token from database
+    const userDetails = await User.findOne({ token: token });
     // If user not found return
+    if (!userDetails) {
+      return res.status(401).json({
+        success: false,
+        message: "Token is invalid",
+      });
+    }
     // Token time check if it is expired
+    if (userDetails.resetPasswordExpires < Date.now()) {
+      return res.json({
+        success: false,
+        message: "Token is expired, please regenerate your token",
+      });
+    }
+
     // hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Make entry in DB for the new password
+    await User.findOneAndUpdate(
+      { token: token },
+      { password: hashedPassword },
+      { new: true }
+    );
     // return response
-  } catch (err) {}
+    return res.status(200).json({
+      success: true,
+      message: "Password Reset Successful",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error, not able to reset password",
+    });
+  }
 };

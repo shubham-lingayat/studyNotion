@@ -46,6 +46,7 @@ exports.sendOTP = async (req, res) => {
     const otpPayload = { email, otp };
 
     // Create an Entry in DB for OTP
+    // when creating entry in DB 'OTP schema' it will send mail from model
     const otpBody = await OTP.create(otpPayload);
     console.log(otpBody);
 
@@ -86,7 +87,7 @@ exports.signUp = async (req, res) => {
       !email ||
       !password ||
       !confirmPassword ||
-      !conatctNumber ||
+      !contactNumber ||
       !otp
     ) {
       return res.status(403).json({
