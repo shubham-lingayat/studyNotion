@@ -1,17 +1,19 @@
 const Course = require("../models/Course");
 const categories = require("../models/categories");
 const User = require("../models/User");
-const {
-  uploadFileToCloudinary,
-  uploadImageToCloudinary,
-} = require("../utils/imageUploader");
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 // createCourse Handler
 exports.createCourse = async (req, res) => {
   try {
-    // Data fetch
-    const { courseName, courseDecsription, whatYouWillLearn, price, category } =
+    
+		// Get user ID from request object
+		const userId = req.user.id;
+
+    // Data fetch from request body
+    const { courseName, courseDecsription, whatYouWillLearn, price, tag, status, instructions, category } =
       req.body;
+
     // file fetch
     const thumbnail = req.files.thumbnailImage;
     // data validation
@@ -21,24 +23,29 @@ exports.createCourse = async (req, res) => {
       !whatYouWillLearn ||
       !price ||
       !category ||
-      !thumbnail
+      !thumbnail || !tag
     ) {
       return res.status(401).json({
         success: false,
         message: "All fields are mandetory to fill",
       });
     }
-    // Instructor validation
-    const userId = req.user.id;
-    const instructorDetails = await User.findById(userId);
-    console.log("Instructor Details: ", instructorDetails);
 
-    if (!instructorDetails) {
-      return res.status(401).json({
-        success: false,
-        message: "Instructor is not found in Database",
-      });
-    }
+    if (!status || status === undefined) {
+			status = "Draft";
+		}
+    
+		// Check if the user is an instructor
+		const instructorDetails = await User.findById(userId, {
+			accountType: "Instructor",
+		});
+
+		if (!instructorDetails) {
+			return res.status(404).json({
+				success: false,
+				message: "Instructor Details Not Found",
+			});
+		}
 
     // category validation
     const categoryDetails = await categories.findById(category);
@@ -48,7 +55,7 @@ exports.createCourse = async (req, res) => {
         message: "category details not found",
       });
     }
-    // Image upload to cloudinary
+    // thumbnail image upload to cloudinary
     const thumbnailImageURL = await uploadImageToCloudinary(
       thumbnail,
       process.env.FOLDER_NAME
@@ -58,10 +65,15 @@ exports.createCourse = async (req, res) => {
       courseName,
       courseDescription,
       instructor: instructorDetails._id,
+      whatYouWillLearn: whatYouWillLearn,
       price,
+      tag: tag,
       category: categoryDetails._id,
-      thumbnail: thumbnailImageURL,
+      thumbnail: thumbnailImageURL.secure_url,
+			status: status,
+			instructions: instructions,
     });
+    
     // create course entry in User Schema - For Instructor
     await User.findByIdAndUpdate(
       { _id: instructorDetails._id },

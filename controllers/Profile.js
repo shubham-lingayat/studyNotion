@@ -43,17 +43,16 @@ exports.updateProfile = async (req, res) => {
 // delete Account
 exports.deleteAccount = async (req, res) => {
   try {
+    
+		// TODO: Find More on Job Schedule
+		// const job = schedule.scheduleJob("10 * * * * *", function () {
+		// 	console.log("The answer to life, the universe, and everything!");
+		// });
+		// console.log(job);
     // get Id
     const id = req.user.id;
-    // validation
-    if (!id) {
-      return res.status(401).json({
-        success: false,
-        message: "User is not logged in, Id not found",
-      });
-    }
 
-    const userDetails = await User.findById(id);
+    const userDetails = await User.findById({_id:id});
     if (!userDetails) {
       return res.status(404).json({
         success: false,
@@ -86,13 +85,6 @@ exports.getAllUserDetails = async (req, res) => {
   try {
     // get id
     const id = req.user.id;
-    // validation
-    if (!id) {
-      return res.status(401).json({
-        success: false,
-        message: "user id not found",
-      });
-    }
     // userdetails -> populate additional Details of user (profile details)
     userDetails = await User.findById(id).populate("additionalDetails").exec();
     // validation
