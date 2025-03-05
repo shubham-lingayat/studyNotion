@@ -1,18 +1,25 @@
 const Course = require("../models/Course");
-const categories = require("../models/categories");
+const categories = require("../models/Categories");
 const User = require("../models/User");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 // createCourse Handler
 exports.createCourse = async (req, res) => {
   try {
-    
-		// Get user ID from request object
-		const userId = req.user.id;
+    // Get user ID from request object
+    const userId = req.user.id;
 
     // Data fetch from request body
-    const { courseName, courseDecsription, whatYouWillLearn, price, tag, status, instructions, category } =
-      req.body;
+    const {
+      courseName,
+      courseDecsription,
+      whatYouWillLearn,
+      price,
+      tag,
+      status,
+      instructions,
+      category,
+    } = req.body;
 
     // file fetch
     const thumbnail = req.files.thumbnailImage;
@@ -23,7 +30,8 @@ exports.createCourse = async (req, res) => {
       !whatYouWillLearn ||
       !price ||
       !category ||
-      !thumbnail || !tag
+      !thumbnail ||
+      !tag
     ) {
       return res.status(401).json({
         success: false,
@@ -32,20 +40,20 @@ exports.createCourse = async (req, res) => {
     }
 
     if (!status || status === undefined) {
-			status = "Draft";
-		}
-    
-		// Check if the user is an instructor
-		const instructorDetails = await User.findById(userId, {
-			accountType: "Instructor",
-		});
+      status = "Draft";
+    }
 
-		if (!instructorDetails) {
-			return res.status(404).json({
-				success: false,
-				message: "Instructor Details Not Found",
-			});
-		}
+    // Check if the user is an instructor
+    const instructorDetails = await User.findById(userId, {
+      accountType: "Instructor",
+    });
+
+    if (!instructorDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor Details Not Found",
+      });
+    }
 
     // category validation
     const categoryDetails = await categories.findById(category);
@@ -70,10 +78,10 @@ exports.createCourse = async (req, res) => {
       tag: tag,
       category: categoryDetails._id,
       thumbnail: thumbnailImageURL.secure_url,
-			status: status,
-			instructions: instructions,
+      status: status,
+      instructions: instructions,
     });
-    
+
     // create course entry in User Schema - For Instructor
     await User.findByIdAndUpdate(
       { _id: instructorDetails._id },
@@ -139,6 +147,52 @@ exports.showAllCourses = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error, Not able to fetch all data",
+    });
+  }
+};
+
+// get courseDetails
+exports.getCourseDetails = async (req, res) => {
+  try {
+    // get id
+    const { courseId } = req.body;
+    // find course details
+    const courseDetails = await Course.find({ _id: courseId })
+      .populate({
+        path: "instructor",
+        populate: {
+          path: "additionalDetails",
+        },
+      })
+      .populate("category")
+      .populate("ratingAndReview")
+      .populate({
+        path: "courseContent",
+        populate: {
+          path: "SubSection",
+        },
+      })
+      .exec();
+
+    // validation of data
+    if (!courseDetails) {
+      return res.status(400).json({
+        success: false,
+        message: `Could not find the course with ${courseId}`,
+      });
+    }
+
+    // return response
+    return res.status(200).json({
+      success: true,
+      message: "Course Details fetched successfully",
+      data: courseDetails,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
     });
   }
 };

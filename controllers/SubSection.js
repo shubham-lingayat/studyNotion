@@ -1,5 +1,6 @@
 const SubSection = require("../models/subSection");
 const Section = require("../models/Section");
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 // Create Section Handler
 exports.createSubSection = async (req, res) => {
@@ -36,7 +37,7 @@ exports.createSubSection = async (req, res) => {
         },
       },
       { new: true }
-    ).populate();
+    ).populate("subSection");
     // Log Update Section here after adding Populate query
     console.log(sectionUpdate);
     // return response

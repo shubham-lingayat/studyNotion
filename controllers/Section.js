@@ -25,13 +25,15 @@ exports.createSection = async (req, res) => {
         },
       },
       { new: true }
-    ).populate({
-      path: "courseContent",
-      populate: {
-        path: "subSections",
-        model: "subSection",
-      },
-    });
+    )
+      .populate({
+        path: "courseContent",
+        populate: {
+          path: "subSections",
+          model: "subSection",
+        },
+      })
+      .exec();
 
     console.log(updatedCourseDetails);
 
