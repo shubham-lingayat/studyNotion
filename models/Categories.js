@@ -2,19 +2,19 @@ const mongoose = require("mongoose");
 
 const categoriesSchema = new mongoose.Schema({
   name: {
-    tyep: String,
+    type: String,
     required: true,
     trim: true,
   },
-  discription: {
+  description: {
     type: String,
   },
-  courses:[
-		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "Course",
-		},
-	],
+  courses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    },
+  ],
 });
 
-module.exports = mongoose.Schema("category", categoriesSchema);
+module.exports = mongoose.model("category", categoriesSchema);

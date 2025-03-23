@@ -3,7 +3,9 @@ const { instance } = require("../config/razorpay");
 const Course = require("../models/Course");
 const User = require("../models/User");
 const mailSender = require("../utils/mailSender");
-const { courseEnrollmentEmaail } = require();
+const {
+  courseEnrollmentEmail,
+} = require("../mail/templates/courseEnrollmentEmail");
 
 // Capture the Payment and initiate the Razorpay Order
 exports.capturePayment = async (req, res) => {

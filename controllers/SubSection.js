@@ -120,7 +120,7 @@ exports.updateSubSection = async (req, res) => {
 };
 
 // Delete Sub Section Handler
-exports.updateSubSection = async (req, res) => {
+exports.deleteSubSection = async (req, res) => {
   try {
     // fetch data from request body
     const { sectionId, subSectionId } = req.body;

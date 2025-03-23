@@ -8,9 +8,8 @@ const mailSender = require("../utils/mailSender");
 const { passwordUpdated } = require("../mail/templates/passwordUpdate");
 require("dotenv").config();
 
-
 // SignUp
-exports.signUp = async (req, res) => {
+exports.signup = async (req, res) => {
   try {
     // fetch data from user requset body
     const {
@@ -81,8 +80,8 @@ exports.signUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the user
-		let approved = "";
-		approved === "Instructor" ? (approved = false) : (approved = true);
+    let approved = "";
+    approved === "Instructor" ? (approved = false) : (approved = true);
 
     // Create Entry in DataBase
     const profileDetails = await Profile.create({
@@ -96,8 +95,8 @@ exports.signUp = async (req, res) => {
       firstName,
       lastName,
       email,
-      accountType:accountType,
-      approved:approved,
+      accountType: accountType,
+      approved: approved,
       contactNumber,
       password: hashedPassword,
       additionalDetails: profileDetails._id,
@@ -207,9 +206,9 @@ exports.sendOTP = async (req, res) => {
 
     // Check Unique OTP or Not
     let result = await OTP.findOne({ otp: otp });
-		console.log("Result is Generate OTP Func");
-		console.log("OTP", otp);
-		console.log("Result", result);
+    console.log("Result is Generate OTP Func");
+    console.log("OTP", otp);
+    console.log("Result", result);
     // run loop until we get unique OTP
     while (result) {
       otp = otpGenerator(6, {
@@ -252,7 +251,7 @@ exports.changePassword = async (req, res) => {
     const { oldPassword, newPassword, confirmPassword } = req.body;
 
     // validation on data
-    if ((!oldPassword || !newPassword || !confirmPassword)) {
+    if (!oldPassword || !newPassword || !confirmPassword) {
       return res.status(401).json({
         success: false,
         message: "Please fill all the details",
@@ -260,17 +259,16 @@ exports.changePassword = async (req, res) => {
     }
 
     // Validate old password
-		const isPasswordMatch = await bcrypt.compare(
-			oldPassword,
-			userDetails.password
-		);
+    const isPasswordMatch = await bcrypt.compare(
+      oldPassword,
+      userDetails.password
+    );
     if (!isPasswordMatch) {
-			// If old password does not match, return a 401 (Unauthorized) error
-			return res.status(401).json(
-        { success: false,
-          message: "The password is incorrect"
-        });
-		}
+      // If old password does not match, return a 401 (Unauthorized) error
+      return res
+        .status(401)
+        .json({ success: false, message: "The password is incorrect" });
+    }
 
     if (newPassword !== confirmPassword) {
       return res.status(401).json({
@@ -295,24 +293,24 @@ exports.changePassword = async (req, res) => {
     );
 
     // Send notification email
-		try {
-			const emailResponse = await mailSender(
-				updatedUserDetails.email,
-				passwordUpdated(
-					updatedUserDetails.email,
-					`Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
-				)
-			);
-			console.log("Email sent successfully:", emailResponse.response);
-		} catch (error) {
-			// If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
-			console.error("Error occurred while sending email:", error);
-			return res.status(500).json({
-				success: false,
-				message: "Error occurred while sending email",
-				error: error.message,
-			});
-		}
+    try {
+      const emailResponse = await mailSender(
+        updatedUserDetails.email,
+        passwordUpdated(
+          updatedUserDetails.email,
+          `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
+        )
+      );
+      console.log("Email sent successfully:", emailResponse.response);
+    } catch (error) {
+      // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
+      console.error("Error occurred while sending email:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error occurred while sending email",
+        error: error.message,
+      });
+    }
 
     // return resposne
     return res.status(200).json({
