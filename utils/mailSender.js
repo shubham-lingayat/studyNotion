@@ -1,18 +1,21 @@
 const nodemailer = require("nodemailer");
 
-// DataTransferItemList  - used as an function parameter
+
 const mailSender = async (email, title, body) => {
   try {
-    // need to create Transporter First to send mail
     let transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
+      port: 465, // Use 465 for secure SSL/TLS, or 587 for STARTTLS
+      secure: true, // True for 465, false for 587
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
       },
+      tls: {
+        rejectUnauthorized: false, // Bypass SSL certificate validation
+      },
     });
 
-    // message data
     let info = await transporter.sendMail({
       from: "StudyNotion || Shubham Lingayat",
       to: `${email}`,
@@ -20,10 +23,11 @@ const mailSender = async (email, title, body) => {
       html: `${body}`,
     });
 
-    console.log(info);
+    console.log("Email sent:", info);
     return info;
   } catch (err) {
-    console.error(err.message);
+    console.error("Mail sending failed:", err.message);
+    return null; // Return null instead of undefined
   }
 };
 

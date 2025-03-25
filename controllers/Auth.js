@@ -132,7 +132,7 @@ exports.login = async (req, res) => {
     }
 
     // user check exists or not
-    const user = await User.findOne({ email }).populate("additionaldetails");
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(401).json({
