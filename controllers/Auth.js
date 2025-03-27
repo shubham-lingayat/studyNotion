@@ -65,7 +65,7 @@ exports.signup = async (req, res) => {
     if (recentOTP.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "OTP not found!",
+        message: "OTP not found or email address is wrong!",
       });
     }
 
@@ -146,7 +146,7 @@ exports.login = async (req, res) => {
       const payload = {
         email: user.email,
         id: user._id,
-        role: user.accountType,
+        accountType: user.accountType,
       };
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "24h",
