@@ -20,24 +20,27 @@ const OTPSchema = new mongoose.Schema({
 
 // must written before module export
 // a Function -> to send Mails
-async function sendVerificationEmail(email, otp) {
-  // Create a transporter to send emails
-  // Define the email options
-  // Send the email
-
-  try {
-    const mailResponse = await mailSender(
-      email,
-      "Verification Email From StudyNotion",
-      emailTemplate(otp)
-    );
-    console.log("Email Send Successfully!", mailResponse.response);
-  } catch (error) {
-    console.log("Error occured when sending mail");
-    console.error(error);
-    throw error;
+  async function sendVerificationEmail(email, otp) {
+    // Create a transporter to send emails
+    // Define the email options
+    // Send the email
+    try {
+      const mailResponse = await mailSender(
+        email,
+        "Verification Email From StudyNotion",
+        emailTemplate(otp)
+      );
+  
+      if (!mailResponse) {
+        throw new Error("Mail sending failed, received null response.");
+      }
+  
+      console.log("Email Sent Successfully!", mailResponse.response);
+    } catch (error) {
+      console.error("Error occurred when sending mail:", error);
+      throw error;
+    }
   }
-}
 
 // Define a post-save hook to send email after the document has been saved
 OTPSchema.pre("save", async function (next) {
