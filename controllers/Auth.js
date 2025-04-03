@@ -132,7 +132,7 @@ exports.login = async (req, res) => {
     }
 
     // user check exists or not
-    const user = await User.findOne({ email }).populate("additionaldetails");
+    const user = await User.findOne({ email }).populate("additionalDetails");
 
     if (!user) {
       return res.status(401).json({
@@ -146,7 +146,7 @@ exports.login = async (req, res) => {
       const payload = {
         email: user.email,
         id: user._id,
-        role: user.accountType,
+        accountType: user.accountType,
       };
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "24h",
