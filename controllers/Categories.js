@@ -1,4 +1,4 @@
-const category = require("../models/Categories");
+const Category = require("../models/Categories");
 
 // Create category Handler -----------------
 exports.createCategory = async (req, res) => {
@@ -13,7 +13,7 @@ exports.createCategory = async (req, res) => {
       });
     }
     // create entry in DB
-    const categoryDetails = await category.create({
+    const categoryDetails = await Category.create({
       name: name,
       description: description,
     });
@@ -37,7 +37,7 @@ exports.createCategory = async (req, res) => {
 exports.showAllcategories = async (req, res) => {
   try {
     // find category from database
-    const allcategories = await category.find(
+    const allcategories = await Category.find(
       {},
       { name: true, description: true }
     );
